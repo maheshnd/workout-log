@@ -1,7 +1,7 @@
 "use client";
 
 import type { Compare } from "@/lib/progression";
-import { formatSet } from "@/lib/progression";
+import { formatWeight } from "@/lib/progression";
 import type { SetEntry } from "@/lib/storage";
 import type { Unit } from "@/lib/units";
 import { Stepper } from "./Stepper";
@@ -10,7 +10,7 @@ type Props = {
   index: number;
   value: SetEntry;
   done: boolean;
-  /** Only the next set can be ticked and only the latest done set can be undone. */
+  /** Any done set can be undone; only the next set (with reps > 0) can be ticked. */
   canToggle: boolean;
   bodyweight: boolean;
   unit: Unit;
@@ -41,7 +41,17 @@ export function SetRow(p: Props) {
 
       <div className="set-body">
         {p.done ? (
-          <div className="set-logged num">{formatSet(p.value, p.bodyweight)}</div>
+          <div className="set-logged">
+            {!(p.bodyweight && p.value.weight === 0) && (
+              <>
+                <span className="num">{formatWeight(p.value.weight)}</span>
+                <span className="unit">{p.unit}</span>
+                <span className="times">×</span>
+              </>
+            )}
+            <span className="num">{p.value.reps}</span>
+            <span className="unit">reps</span>
+          </div>
         ) : (
           <>
             {!p.bodyweight && (

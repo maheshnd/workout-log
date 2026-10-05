@@ -274,6 +274,8 @@ button:disabled { cursor: default; }
   font-size: 20px;
 }
 
+.done-key { color: var(--good); }
+
 .ex-key {
   min-width: 48px;
   font-size: 13px;
@@ -374,7 +376,10 @@ button:disabled { cursor: default; }
 
 .set-body { grid-area: body; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 
-.set-logged { font-size: 32px; }
+.set-logged { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; }
+.set-logged .num { font-size: 32px; }
+.set-logged .unit { font-size: 15px; color: var(--muted); margin-right: 4px; }
+.set-logged .times { font-size: 22px; color: var(--muted); margin-right: 6px; }
 
 .stepper {
   display: grid;
@@ -427,7 +432,6 @@ button:disabled { cursor: default; }
 
 .tick[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: var(--on-good); }
 .tick:disabled { border-color: var(--line); color: var(--line); }
-.tick[aria-pressed="true"]:disabled { opacity: 0.55; color: var(--on-good); }
 
 .done-block {
   margin-top: 16px;

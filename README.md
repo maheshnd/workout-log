@@ -66,8 +66,10 @@ The UI state, last-export time and install-hint flag can stay in `localStorage`.
 
 ## Choices made where the spec was open
 
-- **Sets are ticked in order.** Only the next set's ✓ is active, and only the latest done set
-  can be undone. This keeps "sets in order" in the data model exact.
+- **Sets are ticked in order.** Only the next set's ✓ is active (and only with reps > 0).
+  Any done set can be undone; later sets move up and the undone values reopen in the first open row.
+- An added extra set can be removed again with "− Remove extra set" until it is logged.
+- The Today list also shows a "Done" line with today's logged sets (they become "Last" from tomorrow).
 - `storage.ts` also has tiny helpers for `gymlog:ui`, `gymlog:lastExport` and the install-hint
   flag, so that no other file touches `localStorage`.
 - The "Last backup" line only appears once at least one session is logged.

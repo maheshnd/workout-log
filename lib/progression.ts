@@ -22,13 +22,13 @@ export function formatSets(sets: SetEntry[], bodyweight: boolean, unit: Unit = "
   const sameWeight = sets.every((s) => s.weight === sets[0].weight);
   if (sameWeight && sets[0].weight === 0 && bodyweight) return `${reps} reps`;
   if (sameWeight) return `${formatWeight(sets[0].weight)} ${unit} · ${reps}`;
-  return sets.map((s) => `${formatWeight(s.weight)}×${s.reps}`).join("  ");
+  return `${sets.map((s) => `${formatWeight(s.weight)}×${s.reps}`).join("  ")} ${unit}`;
 }
 
-/** One set: "60 × 8", or "15 reps" for bodyweight. */
-export function formatSet(set: SetEntry, bodyweight: boolean): string {
+/** One set: "60 kg × 8", or "15 reps" for bodyweight. */
+export function formatSet(set: SetEntry, bodyweight: boolean, unit: Unit = "kg"): string {
   if (bodyweight && set.weight === 0) return `${set.reps} reps`;
-  return `${formatWeight(set.weight)} × ${set.reps}`;
+  return `${formatWeight(set.weight)} ${unit} × ${set.reps}`;
 }
 
 /** Most recent session strictly before `today` with at least one set. */

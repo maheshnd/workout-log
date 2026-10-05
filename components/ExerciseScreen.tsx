@@ -19,8 +19,9 @@ type Props = {
   extra: boolean;
   onDraft: (draft: (SetEntry | null)[]) => void;
   onAddSet: () => void;
+  onRemoveSet: () => void;
   onLog: (index: number, set: SetEntry) => void;
-  onUndo: (index: number, set: SetEntry) => void;
+  onUndo: (index: number) => void;
   onBack: () => void;
 };
 
@@ -37,7 +38,7 @@ function planLine(ex: Exercise, t: Target, unit: Unit): string {
   }
 }
 
-export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraft, onAddSet, onLog, onUndo, onBack }: Props) {
+export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraft, onAddSet, onRemoveSet, onLog, onUndo, onBack }: Props) {
   useEffect(() => keepAwake(), []);
 
   const sessions = sessionsToUnit(getSessions(ex.id), unit);
@@ -58,6 +59,13 @@ export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraf
     // Also prefill the new weight into the not-yet-done sets below.
     for (let j = i; j < rows; j++) if (j >= done.length) next[j] = { ...valueAt(j), weight };
     onDraft(next);
+  };
+  const undo = (i: number) => {
+    // The undone values reopen in the first open row, so nothing has to be re-entered.
+    const next = [...draft];
+    next[done.length - 1] = done[i];
+    onDraft(next);
+    onUndo(i);
   };
   const setReps = (i: number, reps: number) => {
     const next = [...draft];
@@ -83,7 +91,7 @@ export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraf
             <p className="muted">{formatDay(last.date)}</p>
             <p className="last-sets num">
               {last.sets.map((s, i) => (
-                <span key={i}>{formatSet(s, bw)}</span>
+                <span key={i}>{formatSet(s, bw, unit)}</span>
               ))}
             </p>
           </>
@@ -103,14 +111,14 @@ export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraf
               index={i}
               value={valueAt(i)}
               done={isDone}
-              canToggle={i === done.length || i === done.length - 1}
+              canToggle={isDone || (i === done.length && valueAt(i).reps > 0)}
               bodyweight={bw}
               unit={unit}
               weightStep={weightStep}
               compare={isDone ? compareSet(done[i], last?.sets[i]) : undefined}
               onWeight={(w) => setWeight(i, w)}
               onReps={(r) => setReps(i, r)}
-              onToggle={() => (isDone ? onUndo(i, done[i]) : onLog(i, valueAt(i)))}
+              onToggle={() => (isDone ? undo(i) : onLog(i, valueAt(i)))}
             />
           );
         })}
@@ -119,6 +127,11 @@ export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraf
       {!extra && rows === ex.sets && (
         <button type="button" className="link-btn" onClick={onAddSet}>
           + Add set
+        </button>
+      )}
+      {extra && done.length <= ex.sets && (
+        <button type="button" className="link-btn" onClick={onRemoveSet}>
+          − Remove extra set
         </button>
       )}
 

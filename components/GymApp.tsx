@@ -174,13 +174,11 @@ export default function GymApp() {
             afterWrite(upsertSet(today, exercise, i, { weight: fromUnit(set.weight, unit), reps: set.reps }));
             requestPersist();
           }}
-          onUndo={(i, set) => {
-            // Keep the undone values in the row so nothing has to be re-entered.
-            const d = [...(ui.drafts[id] ?? [])];
-            d[i] = set;
-            update({ drafts: { ...ui.drafts, [id]: d } });
-            afterWrite(removeSet(today, id, i));
+          onRemoveSet={() => {
+            const d = (ui.drafts[id] ?? []).slice(0, exercise.sets);
+            update({ extra: { ...ui.extra, [id]: false }, drafts: { ...ui.drafts, [id]: d } });
           }}
+          onUndo={(i) => afterWrite(removeSet(today, id, i))}
           onBack={() => update({ view: "today", exerciseId: null })}
         />
       </main>

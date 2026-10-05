@@ -14,7 +14,8 @@ export function ExerciseList({ day, today, unit, onOpen }: Props) {
         const sessions = sessionsToUnit(getSessions(ex.id), unit);
         const last = lastSession(sessions, today);
         const t = target(ex, last, jumpFor(ex, unit));
-        const doneCount = sessions.find((s) => s.date === today)?.sets.length ?? 0;
+        const doneSets = sessions.find((s) => s.date === today)?.sets ?? [];
+        const doneCount = doneSets.length;
         const bw = ex.kind === "bodyweight";
         const complete = doneCount >= ex.sets;
         return (
@@ -43,6 +44,12 @@ export function ExerciseList({ day, today, unit, onOpen }: Props) {
                 </span>
                 {t.weightIncrease > 0 && <span className="badge num">+{formatWeight(t.weightIncrease)} {unit}</span>}
               </span>
+              {doneCount > 0 && (
+                <span className="ex-line">
+                  <span className="ex-key done-key">Done</span>
+                  <span className="num">{formatSets(doneSets, bw, unit)}</span>
+                </span>
+              )}
             </button>
           </li>
         );
