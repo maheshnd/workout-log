@@ -15,14 +15,14 @@ npm run start:static   # serve out/ to test offline (build with BASE_PATH empty)
 
 ## Deploy (GitHub Pages)
 
-Pushing to `main` runs `.github/workflows/deploy.yml`: tests, then `BASE_PATH=/gym-log npm run build`,
-then publishes `out/`. The site is at `https://<owner>.github.io/gym-log/`.
+Pushing to `main` runs `.github/workflows/deploy.yml`: tests, then `BASE_PATH=/workout-log npm run build`,
+then publishes `out/`. The site is at `https://<owner>.github.io/workout-log/`.
 
 First-time setup:
 
 ```bash
-gh repo create gym-log --public --source=. --push
-gh api -X POST repos/<owner>/gym-log/pages -f build_type=workflow
+gh repo create workout-log --public --source=. --push
+gh api -X POST repos/<owner>/workout-log/pages -f build_type=workflow
 ```
 
 For Vercel instead: build with `BASE_PATH` empty and add a `vercel.json` that serves `sw.js`

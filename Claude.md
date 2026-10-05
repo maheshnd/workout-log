@@ -19,7 +19,7 @@ no social features, no settings pages. If a feature is not listed in this file, 
 - Next.js (latest stable, App Router) + TypeScript (strict)
 - **Static export only:** `output: "export"` in `next.config.ts`. No API routes, no server actions,
   no middleware, no `next/image` optimisation (`images: { unoptimized: true }`). The build output is the `out/` folder.
-- `trailingSlash: true`. `basePath` and `assetPrefix` come from the env var `BASE_PATH` (empty for Vercel, `/gym-log` for GitHub Pages).
+- `trailingSlash: true`. `basePath` and `assetPrefix` come from the env var `BASE_PATH` (empty for Vercel, `/workout-log` for GitHub Pages).
 - Plain CSS (`app/globals.css` with CSS variables). No Tailwind, no UI library.
 - Fonts via `next/font/google` (self-hosted at build time, so they work offline).
 - Service worker built with `workbox-build` (`injectManifest`) as a **post-build step over `out/`**,
@@ -364,10 +364,10 @@ The deploy target comes from the kickoff prompt (`vercel` or `github-pages`). De
 ### GitHub Pages
 1. `next.config.ts` reads `BASE_PATH` for `basePath` and `assetPrefix`.
 2. The build must add an empty `out/.nojekyll` file (without it GitHub Pages hides the `_next/` folder and the app breaks).
-3. Add `.github/workflows/deploy.yml` using `actions/configure-pages`, `actions/upload-pages-artifact` (path `out`) and `actions/deploy-pages`, with `BASE_PATH=/gym-log` during the build.
-3. `git init`, commit, then `gh repo create gym-log --public --source=. --push` (if `gh` is not logged in, stop and tell me to run `gh auth login`).
-4. Enable Pages for workflow builds: `gh api -X POST repos/{owner}/gym-log/pages -f build_type=workflow` (ignore "already exists").
-5. Watch the run with `gh run watch`, then print `https://<owner>.github.io/gym-log/`.
+3. Add `.github/workflows/deploy.yml` using `actions/configure-pages`, `actions/upload-pages-artifact` (path `out`) and `actions/deploy-pages`, with `BASE_PATH=/workout-log` during the build.
+3. `git init`, commit, then `gh repo create workout-log --public --source=. --push` (if `gh` is not logged in, stop and tell me to run `gh auth login`).
+4. Enable Pages for workflow builds: `gh api -X POST repos/{owner}/workout-log/pages -f build_type=workflow` (ignore "already exists").
+5. Watch the run with `gh run watch`, then print `https://<owner>.github.io/workout-log/`.
 
 Optional later: a custom subdomain such as `gym.theversehub.in` (only if I ask).
 
