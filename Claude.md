@@ -174,6 +174,14 @@ type Store = { version: 1; sessions: Session[] };
   Components never touch localStorage directly. Later this module gets a Supabase version with the same functions.
 - Use the **local** date (not UTC) for "today". Write a helper `todayLocal()`.
 
+### Units (kg / lb)
+- One global switch, "Weights in kg | lb", in the Data sheet. Saved in `gymlog:unit` (default kg).
+- Storage, export files and the Supabase plan stay in **kg**. `lib/units.ts` converts for display and input only
+  (kg→lb rounded to 0.01; lb→kg kept to 4 decimals so typed lb values round-trip exactly).
+- Progression runs in the display unit: `target(exercise, last, jump)` with lb jumps upper 5, lower 10, iso 5,
+  Bulgarian split squat 5 (`jumpLb` in `plan.ts`). Targets round to 0.5 of the display unit.
+- Weight stepper step in lb: the lb jump, or 2.5 for iso. All "kg" labels, badges and the plan line use the unit.
+
 ---
 
 ## Progression logic (`progression.ts`): the core of the app

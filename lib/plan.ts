@@ -7,8 +7,9 @@ export type Exercise = {
   repMin: number;
   repMax: number;
   kind: Kind;
-  jump: number;
-  note?: string;
+  jump: number; // kg
+  jumpLb: number; // lb, used when the unit is lb
+  note?: string; // "{unit}" is replaced with kg or lb
 };
 
 export type DayType = "push" | "pull" | "legs";
@@ -22,6 +23,7 @@ export type Day = {
 };
 
 export const JUMP: Record<Kind, number> = { upper: 2.5, lower: 5, iso: 2, bodyweight: 0 };
+export const JUMP_LB: Record<Kind, number> = { upper: 5, lower: 10, iso: 5, bodyweight: 0 };
 
 export const REST_GUIDANCE = "Rest 2–3 min on the first 2 exercises, 60–90 sec on the rest.";
 export const REST_DAY_MESSAGE = "Rest day. Sleep 7–9 hours. Walk if you want.";
@@ -33,9 +35,19 @@ function ex(
   repMin: number,
   repMax: number,
   kind: Kind,
-  extra: { note?: string; jump?: number } = {},
+  extra: { note?: string; jump?: number; jumpLb?: number } = {},
 ): Exercise {
-  return { id, name, sets, repMin, repMax, kind, jump: extra.jump ?? JUMP[kind], ...(extra.note ? { note: extra.note } : {}) };
+  return {
+    id,
+    name,
+    sets,
+    repMin,
+    repMax,
+    kind,
+    jump: extra.jump ?? JUMP[kind],
+    jumpLb: extra.jumpLb ?? JUMP_LB[kind],
+    ...(extra.note ? { note: extra.note } : {}),
+  };
 }
 
 // Shared exercises are the same object, so they share one history (keyed by id).
@@ -109,7 +121,7 @@ export const PLAN: Day[] = [
     title: "Pull B — back width",
     type: "pull",
     exercises: [
-      ex("weighted-pullup", "Weighted pull-up", 4, 6, 8, "upper", { note: "weight = added kg" }),
+      ex("weighted-pullup", "Weighted pull-up", 4, 6, 8, "upper", { note: "weight = added {unit}" }),
       ex("single-arm-db-row", "Single-arm dumbbell row", 4, 10, 12, "upper"),
       ex("seated-cable-row-wide", "Seated cable row (wide)", 3, 10, 12, "upper"),
       ex("straight-arm-pulldown", "Straight-arm pulldown", 3, 12, 15, "iso"),
@@ -126,7 +138,7 @@ export const PLAN: Day[] = [
     exercises: [
       rdl(4),
       ex("hip-thrust", "Barbell hip thrust", 4, 10, 12, "lower"),
-      ex("bulgarian-split-squat", "Bulgarian split squat", 3, 10, 10, "lower", { note: "reps per leg", jump: 2.5 }),
+      ex("bulgarian-split-squat", "Bulgarian split squat", 3, 10, 10, "lower", { note: "reps per leg", jump: 2.5, jumpLb: 5 }),
       ex("lying-leg-curl", "Lying leg curl", 4, 12, 15, "iso"),
       ex("leg-press-feet-high", "Leg press (feet high)", 3, 12, 15, "lower"),
       ex("seated-calf-raise", "Seated calf raise", 4, 15, 20, "iso"),

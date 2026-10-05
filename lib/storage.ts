@@ -2,6 +2,7 @@
 // store functions later with the same signatures.
 import type { Exercise } from "./plan";
 import { isSession } from "./exportImport";
+import type { Unit } from "./units";
 
 export type SetEntry = { weight: number; reps: number }; // weight in kg, 0 allowed
 
@@ -20,6 +21,7 @@ const KEY = "gymlog:v1";
 const UI_KEY = "gymlog:ui";
 const EXPORT_KEY = "gymlog:lastExport";
 const HINT_KEY = "gymlog:installHintDismissed";
+const UNIT_KEY = "gymlog:unit";
 
 let cache: Store | null = null;
 
@@ -143,6 +145,15 @@ export function loadUi<T>(): T | null {
 
 export function saveUi(ui: unknown): void {
   write(UI_KEY, JSON.stringify(ui));
+}
+
+/** Display unit. Stored weights are always kg. */
+export function getUnit(): Unit {
+  return read(UNIT_KEY) === "lb" ? "lb" : "kg";
+}
+
+export function setUnit(unit: Unit): void {
+  write(UNIT_KEY, unit);
 }
 
 export function isInstallHintDismissed(): boolean {

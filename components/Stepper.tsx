@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { formatKg } from "@/lib/progression";
+import { formatWeight } from "@/lib/progression";
 
 type Props = {
-  label: string; // "kg" or "reps"
+  label: string; // "kg", "lb" or "reps"
   value: number;
   step: number;
   decimal: boolean;
@@ -37,10 +37,10 @@ export function Stepper({ label, value, step, decimal, onChange }: Props) {
         <button
           type="button"
           className="step-value"
-          aria-label={`${formatKg(value)} ${label}, tap to type`}
-          onClick={() => setText(formatKg(value))}
+          aria-label={`${formatWeight(value)} ${label}, tap to type`}
+          onClick={() => setText(formatWeight(value))}
         >
-          <span className="num">{formatKg(value)}</span>
+          <span className="num">{formatWeight(value)}</span>
           <span className="unit">{label}</span>
         </button>
       ) : (

@@ -14,15 +14,18 @@ import {
 import {
   dismissInstallHint,
   getLastExport,
+  getUnit,
   isInstallHintDismissed,
   loadStore,
   loadUi,
   removeSet,
   saveUi,
   setLastExport,
+  setUnit,
   upsertSet,
   type SetEntry,
 } from "@/lib/storage";
+import { fromUnit, type Unit } from "@/lib/units";
 import { DataSheet } from "./DataSheet";
 import { DayTabs } from "./DayTabs";
 import { ExerciseList } from "./ExerciseList";
@@ -68,6 +71,7 @@ export default function GymApp() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [updateReady, setUpdateReady] = useState(false);
   const [lastExport, setLastExportState] = useState<string | null>(null);
+  const [unit, setUnitState] = useState<Unit>("kg");
   const [showHint, setShowHint] = useState(false);
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const todayRef = useRef("");
@@ -80,6 +84,7 @@ export default function GymApp() {
     setToday(t);
     setUi(restoreUi(loadUi<Ui>(), t));
     setLastExportState(getLastExport());
+    setUnitState(getUnit());
     setShowHint(!isStandalone() && !isInstallHintDismissed());
     setMounted(true);
     registerServiceWorker(() => setUpdateReady(true));
@@ -160,12 +165,13 @@ export default function GymApp() {
           key={id}
           exercise={exercise}
           today={today}
+          unit={unit}
           draft={ui.drafts[id] ?? []}
           extra={!!ui.extra[id]}
           onDraft={(d) => update({ drafts: { ...ui.drafts, [id]: d } })}
           onAddSet={() => update({ extra: { ...ui.extra, [id]: true } })}
           onLog={(i, set) => {
-            afterWrite(upsertSet(today, exercise, i, set));
+            afterWrite(upsertSet(today, exercise, i, { weight: fromUnit(set.weight, unit), reps: set.reps }));
             requestPersist();
           }}
           onUndo={(i, set) => {
@@ -212,7 +218,7 @@ export default function GymApp() {
         <section className="screen">
           <h1 className="day-title">{day.title}</h1>
           <p className="muted rest-line">{REST_GUIDANCE}</p>
-          <ExerciseList day={day} today={today} onOpen={(exId) => update({ view: "exercise", exerciseId: exId })} />
+          <ExerciseList day={day} today={today} unit={unit} onOpen={(exId) => update({ view: "exercise", exerciseId: exId })} />
         </section>
       ) : (
         <section className="screen">
@@ -233,6 +239,12 @@ export default function GymApp() {
       {sheetOpen && (
         <DataSheet
           lastExport={lastExport}
+          unit={unit}
+          onUnit={(u) => {
+            setUnit(u);
+            setUnitState(u);
+            update({ drafts: {} }); // drafts were typed in the old unit
+          }}
           onExport={doExport}
           onChanged={afterWrite}
           onClose={() => setSheetOpen(false)}

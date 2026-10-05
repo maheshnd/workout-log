@@ -3,14 +3,17 @@
 import { useEffect } from "react";
 import type { Exercise } from "@/lib/plan";
 import { formatDay } from "@/lib/dates";
-import { compareSet, formatKg, formatSet, lastSession, target, type Target } from "@/lib/progression";
+import { compareSet, formatSet, formatWeight, lastSession, target, type Target } from "@/lib/progression";
 import { keepAwake } from "@/lib/pwa";
 import { getSessions, type SetEntry } from "@/lib/storage";
+import { jumpFor, noteFor, sessionsToUnit, stepFor, type Unit } from "@/lib/units";
 import { SetRow } from "./SetRow";
 
 type Props = {
   exercise: Exercise;
   today: string;
+  /** Display unit; all values passed in and out of this screen are in it. */
+  unit: Unit;
   /** Edited-but-not-ticked values, by row index. */
   draft: (SetEntry | null)[];
   extra: boolean;
@@ -21,12 +24,12 @@ type Props = {
   onBack: () => void;
 };
 
-function planLine(ex: Exercise, t: Target): string {
+function planLine(ex: Exercise, t: Target, unit: Unit): string {
   switch (t.reason) {
     case "first":
       return ex.kind === "bodyweight" ? "First time. Do what you can." : "First time. Enter your weight.";
     case "add-weight":
-      return `You hit the top last time. +${formatKg(t.weightIncrease)} kg, start at ${ex.repMin} reps.`;
+      return `You hit the top last time. +${formatWeight(t.weightIncrease)} ${unit}, start at ${ex.repMin} reps.`;
     case "top-bodyweight":
       return "Top of range — slow the reps down or add weight.";
     case "add-reps":
@@ -34,15 +37,16 @@ function planLine(ex: Exercise, t: Target): string {
   }
 }
 
-export function ExerciseScreen({ exercise: ex, today, draft, extra, onDraft, onAddSet, onLog, onUndo, onBack }: Props) {
+export function ExerciseScreen({ exercise: ex, today, unit, draft, extra, onDraft, onAddSet, onLog, onUndo, onBack }: Props) {
   useEffect(() => keepAwake(), []);
 
-  const sessions = getSessions(ex.id);
+  const sessions = sessionsToUnit(getSessions(ex.id), unit);
   const last = lastSession(sessions, today);
-  const t = target(ex, last);
+  const t = target(ex, last, jumpFor(ex, unit));
   const done = sessions.find((s) => s.date === today)?.sets ?? [];
   const bw = ex.kind === "bodyweight";
-  const weightStep = ex.kind === "iso" ? 1 : ex.jump;
+  const weightStep = stepFor(ex, unit);
+  const note = noteFor(ex, unit);
   const rows = Math.max(ex.sets + (extra ? 1 : 0), done.length);
   const allDone = done.length >= ex.sets;
 
@@ -69,7 +73,7 @@ export function ExerciseScreen({ exercise: ex, today, draft, extra, onDraft, onA
       <h1 className="ex-title">{ex.name}</h1>
       <p className="scheme num">
         {ex.sets} × {ex.repMin === ex.repMax ? ex.repMin : `${ex.repMin}–${ex.repMax}`}
-        {ex.note && <span className="note"> · {ex.note}</span>}
+        {note && <span className="note"> · {note}</span>}
       </p>
 
       <div className="last-block">
@@ -88,7 +92,7 @@ export function ExerciseScreen({ exercise: ex, today, draft, extra, onDraft, onA
         )}
       </div>
 
-      <p className="plan-line">{planLine(ex, t)}</p>
+      <p className="plan-line">{planLine(ex, t, unit)}</p>
 
       <ol className="set-list">
         {Array.from({ length: rows }, (_, i) => {
@@ -101,6 +105,7 @@ export function ExerciseScreen({ exercise: ex, today, draft, extra, onDraft, onA
               done={isDone}
               canToggle={i === done.length || i === done.length - 1}
               bodyweight={bw}
+              unit={unit}
               weightStep={weightStep}
               compare={isDone ? compareSet(done[i], last?.sets[i]) : undefined}
               onWeight={(w) => setWeight(i, w)}

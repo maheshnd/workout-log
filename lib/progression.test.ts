@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { findExercise } from "./plan";
-import { compareSet, formatKg, lastSession, target } from "./progression";
+import { compareSet, formatSets, formatWeight, lastSession, target } from "./progression";
 import type { Session } from "./storage";
+import { fromUnit, jumpFor, sessionsToUnit, stepFor, toUnit } from "./units";
 
 function ex(day: number, id: string) {
   const e = findExercise(day, id);
@@ -54,7 +55,7 @@ describe("target", () => {
     expect(t.reason).toBe("add-weight");
     expect(t.weightIncrease).toBe(2.5);
     expect(t.sets).toEqual(Array(4).fill({ weight: 62.5, reps: 6 }));
-    expect(formatKg(t.sets[0].weight)).toBe("62.5");
+    expect(formatWeight(t.sets[0].weight)).toBe("62.5");
   });
 
   it("squat 100 × [8,8,8,8] → 105 × 6", () => {
@@ -135,5 +136,48 @@ describe("compareSet", () => {
     expect(compareSet({ weight: 60, reps: 8 }, { weight: 60, reps: 8 })).toBe("same");
     expect(compareSet({ weight: 60, reps: 7 }, { weight: 60, reps: 8 })).toBe("worse");
     expect(compareSet({ weight: 60, reps: 7 }, undefined)).toBeUndefined();
+  });
+});
+
+describe("lb unit", () => {
+  // Stored in kg; what the user typed in lb.
+  const lbSession = (lb: number, reps: number[]) =>
+    session("2026-10-01", "bench-press", 4, 6, 8, fromUnit(lb, "lb"), reps);
+
+  it("typed lb values convert to kg and back exactly", () => {
+    for (const lb of [0, 45, 135, 137.5, 225, 315.5]) expect(toUnit(fromUnit(lb, "lb"), "lb")).toBe(lb);
+    expect(toUnit(100, "lb")).toBe(220.46);
+    expect(toUnit(60, "kg")).toBe(60);
+  });
+
+  it("bench 135 lb × [8,8,8,8] → 140 lb × 6", () => {
+    const last = sessionsToUnit([lbSession(135, [8, 8, 8, 8])], "lb")[0];
+    const t = target(bench, last, jumpFor(bench, "lb"));
+    expect(t.reason).toBe("add-weight");
+    expect(t.weightIncrease).toBe(5);
+    expect(t.sets).toEqual(Array(4).fill({ weight: 140, reps: 6 }));
+    expect(formatSets(t.sets, false, "lb")).toBe("140 lb · 6 6 6 6");
+  });
+
+  it("bench 135 lb × [8,8,7,6] keeps 135 lb and adds reps", () => {
+    const last = sessionsToUnit([lbSession(135, [8, 8, 7, 6])], "lb")[0];
+    const t = target(bench, last, jumpFor(bench, "lb"));
+    expect(t.sets.map((s) => s.weight)).toEqual([135, 135, 135, 135]);
+    expect(t.sets.map((s) => s.reps)).toEqual([8, 8, 8, 7]);
+  });
+
+  it("lb jumps: upper 5, lower 10, iso 5, split squat 5; iso stepper 2.5", () => {
+    expect(jumpFor(ex(3, "back-squat"), "lb")).toBe(10);
+    expect(jumpFor(ex(1, "lateral-raise"), "lb")).toBe(5);
+    expect(jumpFor(ex(6, "bulgarian-split-squat"), "lb")).toBe(5);
+    expect(stepFor(ex(1, "lateral-raise"), "lb")).toBe(2.5);
+    expect(stepFor(ex(1, "lateral-raise"), "kg")).toBe(1);
+    expect(jumpFor(ex(3, "hanging-leg-raise"), "lb")).toBe(0);
+  });
+
+  it("squat 225 lb × [8,8,8,8] → 235 lb × 6", () => {
+    const squat = ex(3, "back-squat");
+    const last = sessionsToUnit([session("2026-10-01", "back-squat", 4, 6, 8, fromUnit(225, "lb"), [8, 8, 8, 8])], "lb")[0];
+    expect(target(squat, last, jumpFor(squat, "lb")).sets[0]).toEqual({ weight: 235, reps: 6 });
   });
 });

@@ -1,5 +1,6 @@
 import type { Exercise } from "./plan";
 import type { Session, SetEntry } from "./storage";
+import type { Unit } from "./units";
 
 export type Reason = "first" | "top-bodyweight" | "add-weight" | "add-reps";
 
@@ -10,24 +11,24 @@ export function roundHalf(n: number): number {
 }
 
 /** "62.5", "60", never "62.50". */
-export function formatKg(n: number): string {
+export function formatWeight(n: number): string {
   return String(Math.round(n * 100) / 100);
 }
 
 /** "60 kg · 8 8 7 6", or "60×8 57.5×7" when weights differ. */
-export function formatSets(sets: SetEntry[], bodyweight: boolean): string {
+export function formatSets(sets: SetEntry[], bodyweight: boolean, unit: Unit = "kg"): string {
   if (sets.length === 0) return "";
   const reps = sets.map((s) => s.reps).join(" ");
   const sameWeight = sets.every((s) => s.weight === sets[0].weight);
   if (sameWeight && sets[0].weight === 0 && bodyweight) return `${reps} reps`;
-  if (sameWeight) return `${formatKg(sets[0].weight)} kg · ${reps}`;
-  return sets.map((s) => `${formatKg(s.weight)}×${s.reps}`).join("  ");
+  if (sameWeight) return `${formatWeight(sets[0].weight)} ${unit} · ${reps}`;
+  return sets.map((s) => `${formatWeight(s.weight)}×${s.reps}`).join("  ");
 }
 
 /** One set: "60 × 8", or "15 reps" for bodyweight. */
 export function formatSet(set: SetEntry, bodyweight: boolean): string {
   if (bodyweight && set.weight === 0) return `${set.reps} reps`;
-  return `${formatKg(set.weight)} × ${set.reps}`;
+  return `${formatWeight(set.weight)} × ${set.reps}`;
 }
 
 /** Most recent session strictly before `today` with at least one set. */
@@ -44,7 +45,8 @@ export function heaviest(sets: SetEntry[]): number {
   return sets.reduce((m, s) => Math.max(m, s.weight), 0);
 }
 
-export function target(exercise: Exercise, last: Session | undefined): Target {
+/** Weights in `last` and in the result are in the same unit as `jump` (kg by default). */
+export function target(exercise: Exercise, last: Session | undefined, jump: number = exercise.jump): Target {
   const n = exercise.sets;
 
   if (!last || last.sets.length === 0) {
@@ -63,7 +65,7 @@ export function target(exercise: Exercise, last: Session | undefined): Target {
         weightIncrease: 0,
       };
     }
-    const weight = roundHalf(heaviest(last.sets) + exercise.jump);
+    const weight = roundHalf(heaviest(last.sets) + jump);
     return {
       sets: fill(n, () => ({ weight, reps: exercise.repMin })),
       reason: "add-weight",

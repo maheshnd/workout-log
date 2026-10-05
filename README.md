@@ -47,6 +47,13 @@ Data → Export backup writes `gym-log-YYYY-MM-DD.json`:
 Import checks the whole file first and rejects it if anything is wrong. Sessions with the same
 `(date, exerciseId)` are replaced by the file. Everything else is kept.
 
+## Units
+
+Data → "Weights in kg | lb". Weights are always saved in kg (so backups are unit-free);
+lb is converted for display and typing. In lb the jumps are upper +5, lower +10, isolation +5,
+split squat +5, and the isolation stepper moves by 2.5 lb. History logged in kg shows converted
+(e.g. 10 kg → 22.05 lb), and the next target rounds to the nearest 0.5 lb.
+
 ## Swapping storage for Supabase later
 
 Only `lib/storage.ts` touches `localStorage`. To move to Supabase, write a version of the store

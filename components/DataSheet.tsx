@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { formatDay, todayLocal } from "@/lib/dates";
 import { mergeSessions, parseImport } from "@/lib/exportImport";
 import { clearAll, loadStore, replaceStore, type Session } from "@/lib/storage";
+import type { Unit } from "@/lib/units";
 
 type Props = {
   lastExport: string | null;
+  unit: Unit;
+  onUnit: (unit: Unit) => void;
   onExport: () => void;
   /** Called after the store changed; `ok` is false if the write failed. */
   onChanged: (ok: boolean) => void;
@@ -18,7 +21,7 @@ type Mode =
   | { kind: "confirm-import"; sessions: Session[] }
   | { kind: "confirm-delete"; typed: string };
 
-export function DataSheet({ lastExport, onExport, onChanged, onClose }: Props) {
+export function DataSheet({ lastExport, unit, onUnit, onExport, onChanged, onClose }: Props) {
   const [mode, setMode] = useState<Mode>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
   const count = loadStore().sessions.length;
@@ -68,6 +71,17 @@ export function DataSheet({ lastExport, onExport, onChanged, onClose }: Props) {
           <span className="num">{count}</span> sessions stored · Last export:{" "}
           {lastExport ? formatDay(todayLocal(new Date(lastExport))) : "never"}
         </p>
+
+        <div className="unit-row">
+          <span id="unit-label">Weights in</span>
+          <div className="unit-toggle" role="group" aria-labelledby="unit-label">
+            {(["kg", "lb"] as const).map((u) => (
+              <button key={u} type="button" aria-pressed={unit === u} onClick={() => onUnit(u)}>
+                {u}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {mode.kind === "idle" && mode.message && (
           <p className="sheet-msg" role="status">

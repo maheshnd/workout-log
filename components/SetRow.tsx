@@ -3,6 +3,7 @@
 import type { Compare } from "@/lib/progression";
 import { formatSet } from "@/lib/progression";
 import type { SetEntry } from "@/lib/storage";
+import type { Unit } from "@/lib/units";
 import { Stepper } from "./Stepper";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   /** Only the next set can be ticked and only the latest done set can be undone. */
   canToggle: boolean;
   bodyweight: boolean;
+  unit: Unit;
   weightStep: number;
   compare?: Compare;
   onWeight: (w: number) => void;
@@ -43,7 +45,7 @@ export function SetRow(p: Props) {
         ) : (
           <>
             {!p.bodyweight && (
-              <Stepper label="kg" value={p.value.weight} step={p.weightStep} decimal onChange={p.onWeight} />
+              <Stepper label={p.unit} value={p.value.weight} step={p.weightStep} decimal onChange={p.onWeight} />
             )}
             <Stepper label="reps" value={p.value.reps} step={1} decimal={false} onChange={p.onReps} />
           </>
