@@ -1,0 +1,30 @@
+{
+  "name": "gym-log",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node scripts/build-sw.mjs",
+    "start:static": "npx serve out",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "workbox-window": "^7.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "serve": "^14.2.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3",
+    "workbox-build": "^7.4.1",
+    "workbox-core": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1"
+  }
+}
